@@ -9,29 +9,29 @@ export function listTextbookInfo(query) {
   })
 }
 
-export function addPublisher(data) {
+export function addTextbook(data) {
     return request({
-        url: '/textbook/textbookInfo/addPublisher',
+        url: '/textbook/textbookInfo/addTextbook',
         method: 'post',
       data: data
     })
   }
-  export function updatePublisher(data) {
+  export function updateTextbook(data) {
     return request({
-        url: '/textbook/publisher/updatePublisher',
+        url: '/textbook/textbookInfo/updateTextbook',
       method: 'put',
       data: data
     })
   }
-  export function getPublisher(publisherId) {
+  export function getTextbook(textbookId) {
     return request({
-      url: '/textbook/publisher/' + publisherId,
+      url: '/textbook/textbookInfo/' + textbookId,
       method: 'get'
     })
   }
-  export function delPublisher(publisherId) {
+  export function delTextbook(textbookId) {
     return request({
-      url: '/textbook/publisher/delPublisher/' + publisherId,
+      url: '/textbook/textbookInfo/delTextbook/' + textbookId,
       method: 'delete'
     })
   }

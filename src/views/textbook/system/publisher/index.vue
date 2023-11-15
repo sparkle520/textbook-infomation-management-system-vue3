@@ -166,7 +166,7 @@ const data = reactive({
  },
  rules: {
   publisherName: [{ required: true, message: "出版社名称不能为空", trigger: "blur" }],
-  publisherISBN: [{ required: true, message: "出版社编码不能为空", trigger: "blur" }],
+ // publisherISBN: [{ required: true, message: "出版社编码不能为空", trigger: "blur" }],
  }
 });
 

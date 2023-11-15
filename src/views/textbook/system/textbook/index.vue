@@ -1,19 +1,19 @@
 <template>
     <div class="app-container">
        <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
-          <el-form-item label="出版社ISBN编号" prop="publisherISBN">
+          <el-form-item label="教材作者" prop="textbookAuthor">
              <el-input
-                v-model="queryParams.publisherISBN"
-                placeholder="请输入出版社ISBN编号"
+                v-model="queryParams.textbookAuthor"
+                placeholder="请输入教材作者"
                 clearable
                 style="width: 200px"
                 @keyup.enter="handleQuery"
              />
           </el-form-item>
-          <el-form-item label="出版社名称" prop="publisherName">
+          <el-form-item label="教材名称" prop="textbookTitle">
              <el-input
-                v-model="queryParams.publisherName"
-                placeholder="请输入出版社名称"
+                v-model="queryParams.textbookTitle"
+                placeholder="请输入教材名称"
                 clearable
                 style="width: 200px"
                 @keyup.enter="handleQuery"
@@ -82,7 +82,8 @@
           <el-table-column label="教材ID" align="center" prop="textbookId" />
           <el-table-column label="教材名称" align="center" prop="textbookTitle" />
           <el-table-column label="教材作者" align="center" prop="textbookAuthor" />
-          <el-table-column label="出版社ID" align="center" prop="publisherId" />
+          <el-table-column label="教材ISBN" align="center" prop="textbookISBN" />
+          <el-table-column label="出版社名称" align="center" prop="publisherName" />
           <el-table-column label="教材价格" align="center" prop="textbookPrice" />
           <el-table-column label="创建时间" align="center" prop="textbookCreateTime" />
           <!-- <el-table-column label="状态" align="center" prop="publisherISBN">
@@ -114,22 +115,21 @@
        <!-- 添加或修改岗位对话框 -->
        <el-dialog :title="title" v-model="open" width="500px" append-to-body>
           <el-form ref="postRef" :model="form" :rules="rules" label-width="130px">
+             <el-form-item label="教材名称" prop="textbookTitle">
+                <el-input v-model="form.textbookTitle" placeholder="请输入教材名称" />
+             </el-form-item>
+             <el-form-item label="教材作者" prop="textbookAuthor">
+                <el-input v-model="form.textbookAuthor" placeholder="请输入教材作者" />
+             </el-form-item>
+             <el-form-item label="教材ISBN编码" prop="textbookISBN">
+                <el-input v-model="form.textbookISBN" placeholder="请输入教材ISBN" />
+             </el-form-item>
              <el-form-item label="出版社名称" prop="publisherName">
                 <el-input v-model="form.publisherName" placeholder="请输入出版社名称" />
              </el-form-item>
-             <el-form-item label="出版社ISBN编号" prop="publisherISBN">
-                <el-input v-model="form.publisherISBN" placeholder="请输入出版社ISBN编号" />
+             <el-form-item label="教材价格" prop="textbookPrice">
+                <el-input v-model="form.textbookPrice" placeholder="请输入教材价格" />
              </el-form-item>
-             <el-form-item label="出版社联系人姓名" prop="publisherContactName">
-                <el-input v-model="form.publisherContactName" placeholder="请输入出版社联系人姓名" />
-             </el-form-item>
-             <el-form-item label="出版社电话" prop="publisherPhone">
-                <el-input v-model="form.publisherPhone" placeholder="请输入出版社电话" />
-             </el-form-item>
-             <el-form-item label="出版社地址" prop="publisherAddress">
-                <el-input v-model="form.publisherAddress" placeholder="请输入出版社地址" />
-             </el-form-item>
-           
           </el-form>
           <template #footer>
              <div class="dialog-footer">
@@ -142,7 +142,7 @@
   </template>
   
   <script setup name="Post">
-  import { listTextbookInfo , addPublisher ,getPublisher ,updatePublisher,delPublisher} from "../../../../api/textbook/system/textbook.js";
+  import { listTextbookInfo , addTextbook ,getTextbook ,updateTextbook,delTextbook} from "../../../../api/textbook/system/textbook.js";
   const { proxy } = getCurrentInstance();
   const { sys_normal_disable } = proxy.useDict("sys_normal_disable");
   
@@ -161,18 +161,17 @@
    queryParams: {
      pageNum: 1,
      pageSize: 10,
-     publisherName: undefined,
-     publisherISBN: undefined,
+     textbookTitle: undefined,
+     textbookAuthor: undefined,
    },
    rules: {
-    publisherName: [{ required: true, message: "出版社名称不能为空", trigger: "blur" }],
-    publisherISBN: [{ required: true, message: "出版社编码不能为空", trigger: "blur" }],
+    textbookTitle: [{ required: true, message: "教材名称不能为空", trigger: "blur" }],
+    textbookAuthor: [{ required: true, message: "教材作者不能为空", trigger: "blur" }],
    }
   });
   
   const { queryParams, form, rules } = toRefs(data);
   
-  /** 查询出版社列表 */
   function getList() {
    loading.value = true;
    listTextbookInfo(queryParams.value).then(response => {
@@ -208,7 +207,7 @@
   }
   /** 多选框选中数据 */
   function handleSelectionChange(selection) {
-   ids.value = selection.map(item => item.publisherId);
+   ids.value = selection.map(item => item.textbookId);
    single.value = selection.length != 1;
    multiple.value = !selection.length;
   }
@@ -216,30 +215,30 @@
   function handleAdd() {
    reset();
    open.value = true;
-   title.value = "添加出版社";
+   title.value = "添加教材";
   }
   /** 修改按钮操作 */
   function handleUpdate(row) {
    reset();
-   const publisherId = row.publisherId || ids.value;
-   getPublisher(publisherId).then(response => {
+   const textbookId = row.textbookId || ids.value;
+   getTextbook(textbookId).then(response => {
      form.value = response.data;
      open.value = true;
-     title.value = "修改出版社";
+     title.value = "修改教材信息";
    });
   }
   /** 提交按钮 */
   function submitForm() {
    proxy.$refs["postRef"].validate(valid => {
      if (valid) {
-       if (form.value.publisherId != undefined) {
-        updatePublisher(form.value).then(response => {
+       if (form.value.textbookId != undefined) {
+         updateTextbook(form.value).then(response => {
            proxy.$modal.msgSuccess("修改成功");
            open.value = false;
            getList();
          });
        } else {
-        addPublisher(form.value).then(response => {
+         addTextbook(form.value).then(response => {
            proxy.$modal.msgSuccess("新增成功");
            open.value = false;
            getList();
@@ -250,13 +249,14 @@
   }
   /** 删除按钮操作 */
   function handleDelete(row) {
-   const publisherIds = row.publisherId || ids.value;
-   proxy.$modal.confirm('是否确认删除出版社id为"' + publisherIds + '"的数据项？').then(function() {
-     return delPublisher(publisherIds);
+   const textbookIds = row.textbookId || ids.value;
+   proxy.$modal.confirm('是否确认删除教材id为"' + textbookIds + '"的数据项？').then(function() {
+     return delTextbook(textbookIds);
    }).then(() => {
      getList();
      proxy.$modal.msgSuccess("删除成功");
-   }).catch(() => {});
+   }).catch(() => {
+   });
   }
   /** 导出按钮操作 */
   function handleExport() {
