@@ -133,6 +133,7 @@
            <el-form-item label="出版社地址" prop="publisherAddress">
               <el-input v-model="form.publisherAddress" placeholder="请输入出版社地址" />
            </el-form-item>
+         
         </el-form>
         <template #footer>
            <div class="dialog-footer">
@@ -192,11 +193,10 @@ function cancel() {
 /** 表单重置 */
 function reset() {
  form.value = {
-   publisherName: undefined,
-   publisherISBN: undefined,
-   publisherContactName: undefined,
-   publisherPhone: undefined,
-   publisherAddress: undefined,
+   postId: undefined,
+   postCode: undefined,
+   postName: undefined,
+  
  };
  proxy.resetForm("postRef");
 }

@@ -8,6 +8,12 @@ export function listTextbookInfo(query) {
     params: query
   })
 }
+export function getPublisherIdAndPublisherName() {
+  return request({
+    url: '/textbook/publisher/plist',
+    method: 'get',
+  })
+}
 
 export function addTextbook(data) {
     return request({
