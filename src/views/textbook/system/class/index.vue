@@ -5,24 +5,24 @@
 <template>
   <div class="app-container">
      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
-        <el-form-item label="出版社ISBN编号" prop="publisherISBN">
+        <el-form-item label="班级名称" prop="className">
            <el-input
-              v-model="queryParams.publisherISBN"
-              placeholder="请输入出版社ISBN编号"
+              v-model="queryParams.className"
+              placeholder="请输入班级名称"
               clearable
               style="width: 200px"
               @keyup.enter="handleQuery"
            />
         </el-form-item>
-        <el-form-item label="出版社名称" prop="publisherName">
+        <!-- <el-form-item label="专业名称" prop="majorName">
            <el-input
-              v-model="queryParams.publisherName"
-              placeholder="请输入出版社名称"
+              v-model="queryParams.majorName"
+              placeholder="请输入专业名称"
               clearable
               style="width: 200px"
               @keyup.enter="handleQuery"
            />
-        </el-form-item>
+        </el-form-item> -->
         <!-- <el-form-item label="状态" prop="status">
            <el-select v-model="queryParams.status" placeholder="岗位状态" clearable style="width: 200px">
               <el-option
@@ -81,14 +81,16 @@
         <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
      </el-row>
 
-     <el-table v-loading="loading" :data="publisherList" @selection-change="handleSelectionChange">
+     <el-table v-loading="loading" :data="classList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="出版社ID" align="center" prop="publisherId" />
-        <el-table-column label="出版社名称" align="center" prop="publisherName" />
-        <el-table-column label="出版社联系人姓名" align="center" prop="publisherContactName" />
-        <el-table-column label="出版社电话" align="center" prop="publisherPhone" />
-        <el-table-column label="出版社ISBN编号" align="center" prop="publisherISBN" />
-        <el-table-column label="出版社地址" align="center" prop="publisherAddress" />
+        <el-table-column label="班级id" align="center" prop="classId" />
+        <el-table-column label="班级名称" align="center" prop="className" />
+        <el-table-column label="专业名称" align="center" prop="majorName" />
+        <el-table-column label="导员姓名" align="center" prop="classInstructorName" />
+        <el-table-column label="导员电话" align="center" prop="classInstructorPhone" />
+        <el-table-column label="班长姓名" align="center" prop="classMonitorName" />
+        <el-table-column label="班长联系电话" align="center" prop="classMonitorPhone" />
+        <el-table-column label="班级人数" align="center" prop="classTotal" />
         <!-- <el-table-column label="状态" align="center" prop="publisherISBN">
            <template #default="scope">
               <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
@@ -118,21 +120,31 @@
      <!-- 添加或修改岗位对话框 -->
      <el-dialog :title="title" v-model="open" width="500px" append-to-body>
         <el-form ref="postRef" :model="form" :rules="rules" label-width="130px">
-           <el-form-item label="出版社名称" prop="publisherName">
-              <el-input v-model="form.publisherName" placeholder="请输入出版社名称" />
+           <el-form-item label="班级名称" prop="className">
+              <el-input v-model="form.className" placeholder="请输入班级名称" />
            </el-form-item>
-           <el-form-item label="出版社ISBN编号" prop="publisherISBN">
-              <el-input v-model="form.publisherISBN" placeholder="请输入出版社ISBN编号" />
+           
+           <el-form-item label="专业名称" prop="majorId">
+               <el-select v-model="form.majorId" clearable filterable placeholder="请选择专业名称" class="product-input" allow-create>
+                  <el-option v-for="(item, index) in majorList" :key="index" :label="item.major_name" :value="item.major_id" />
+               </el-select>
+            </el-form-item>
+           <el-form-item label="导员姓名" prop="classInstructorName">
+              <el-input v-model="form.classInstructorName" placeholder="请输入导员姓名" />
            </el-form-item>
-           <el-form-item label="出版社联系人姓名" prop="publisherContactName">
-              <el-input v-model="form.publisherContactName" placeholder="请输入出版社联系人姓名" />
+           <el-form-item label="导员电话" prop="classInstructorPhone">
+              <el-input v-model="form.classInstructorPhone" placeholder="请输入导员电话" />
            </el-form-item>
-           <el-form-item label="出版社电话" prop="publisherPhone">
-              <el-input v-model="form.publisherPhone" placeholder="请输入出版社电话" />
+           <el-form-item label="班长姓名" prop="classMonitorName">
+              <el-input v-model="form.classMonitorName" placeholder="请输入班长姓名" />
            </el-form-item>
-           <el-form-item label="出版社地址" prop="publisherAddress">
-              <el-input v-model="form.publisherAddress" placeholder="请输入出版社地址" />
+           <el-form-item label="班长联系电话" prop="classMonitorPhone">
+              <el-input v-model="form.classMonitorPhone" placeholder="请输入班长联系电话" />
            </el-form-item>
+           <el-form-item label="班级人数" prop="classTotal">
+              <el-input v-model="form.classTotal" placeholder="请输入班级人数" />
+           </el-form-item>
+   
          
         </el-form>
         <template #footer>
@@ -146,11 +158,12 @@
 </template>
 
 <script setup name="Post">
-import { listPublisher , addPublisher ,getPublisher ,updatePublisher,delPublisher} from "../../../../api/textbook/system/publisher";
+import { listClass ,addClass,listMajor,getClass,delClass,updateClass} from "../../../../api/textbook/system/class";
 const { proxy } = getCurrentInstance();
 const { sys_normal_disable } = proxy.useDict("sys_normal_disable");
 
-const publisherList = ref([]);
+const classList = ref([]);
+const majorList = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -165,11 +178,11 @@ const data = reactive({
  queryParams: {
    pageNum: 1,
    pageSize: 10,
-   publisherName: undefined,
-   publisherISBN: undefined,
+   className: undefined,
+   majorName: undefined,
  },
  rules: {
-  publisherName: [{ required: true, message: "出版社名称不能为空", trigger: "blur" }],
+  className: [{ required: true, message: "班级名称不能为空", trigger: "blur" }],
  // publisherISBN: [{ required: true, message: "出版社编码不能为空", trigger: "blur" }],
  }
 });
@@ -179,11 +192,14 @@ const { queryParams, form, rules } = toRefs(data);
 /** 查询出版社列表 */
 function getList() {
  loading.value = true;
- listPublisher(queryParams.value).then(response => {
-  publisherList.value = response.rows;
+ listClass(queryParams.value).then(response => {
+   classList.value = response.rows;
    total.value = response.total;
-   loading.value = false;
  });
+ listMajor().then(response =>{
+   majorList.value = response.data;
+loading.value = false;
+ })
 }
 /** 取消按钮 */
 function cancel() {
@@ -193,9 +209,13 @@ function cancel() {
 /** 表单重置 */
 function reset() {
  form.value = {
-   postId: undefined,
-   postCode: undefined,
-   postName: undefined,
+   className: undefined,
+   majorId: undefined,
+   classInstructorName: undefined,
+   classInstructorPhone: undefined,
+   classMonitorName: undefined,
+   classMonitorPhone: undefined,
+   classTotal: undefined,
   
  };
  proxy.resetForm("postRef");
@@ -212,39 +232,42 @@ function resetQuery() {
 }
 /** 多选框选中数据 */
 function handleSelectionChange(selection) {
- ids.value = selection.map(item => item.publisherId);
+ ids.value = selection.map(item => item.classId);
  single.value = selection.length != 1;
  multiple.value = !selection.length;
 }
 /** 新增按钮操作 */
 function handleAdd() {
  reset();
+
  open.value = true;
- title.value = "添加出版社";
+ title.value = "添加班级";
 }
 /** 修改按钮操作 */
 function handleUpdate(row) {
  reset();
- const publisherId = row.publisherId || ids.value;
- getPublisher(publisherId).then(response => {
-   form.value = response.data;
+ const classId = row.classId || ids.value;
+ getClass(classId).then(response => {
+   form.value = response.data;   
    open.value = true;
-   title.value = "修改出版社";
+   title.value = "修改班级";
  });
 }
 /** 提交按钮 */
 function submitForm() {
  proxy.$refs["postRef"].validate(valid => {
    if (valid) {
-     if (form.value.publisherId != undefined) {
-      updatePublisher(form.value).then(response => {
+     if (form.value.classId != undefined) {
+      console.log(form.value);
+      updateClass(form.value).then(response => {
          proxy.$modal.msgSuccess("修改成功");
          open.value = false;
          getList();
        });
      } else {
-      addPublisher(form.value).then(response => {
-         proxy.$modal.msgSuccess("新增成功");
+      console.log(form.value);
+      addClass(form.value).then(response => {
+            proxy.$modal.msgSuccess("新增成功");
          open.value = false;
          getList();
        });
@@ -254,9 +277,9 @@ function submitForm() {
 }
 /** 删除按钮操作 */
 function handleDelete(row) {
- const publisherIds = row.publisherId || ids.value;
- proxy.$modal.confirm('是否确认删除出版社id为"' + publisherIds + '"的数据项？').then(function() {
-   return delPublisher(publisherIds);
+ const classIds = row.classId || ids.value;
+ proxy.$modal.confirm('是否确认删除出版社id为"' + classIds + '"的数据项？').then(function() {
+   return delClass(classIds);
  }).then(() => {
    getList();
    proxy.$modal.msgSuccess("删除成功");

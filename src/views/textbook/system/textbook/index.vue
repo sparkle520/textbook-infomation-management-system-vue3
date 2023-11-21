@@ -152,9 +152,7 @@ function getList() {
       total.value = response.total;
       loading.value = false;
    });
-   getPublisherIdAndPublisherName().then(response =>{
-      publisherList.value = response.data;
-   })
+  
 }
 /** 取消按钮 */
 function cancel() {
@@ -191,12 +189,18 @@ function handleSelectionChange(selection) {
 /** 新增按钮操作 */
 function handleAdd() {
    reset();
+   getPublisherIdAndPublisherName().then(response =>{
+      publisherList.value = response.data;
+   })
    open.value = true;
    title.value = "添加教材";
 }
 /** 修改按钮操作 */
 function handleUpdate(row) {
    reset();
+   getPublisherIdAndPublisherName().then(response =>{
+      publisherList.value = response.data;
+   })
    const textbookId = row.textbookId || ids.value;
    getTextbook(textbookId).then(response => {
       form.value = response.data;
