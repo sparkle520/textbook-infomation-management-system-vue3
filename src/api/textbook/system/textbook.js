@@ -14,6 +14,12 @@ export function getPublisherIdAndPublisherName() {
     method: 'get',
   })
 }
+export function getReviewVoByTextbookId(textbookId) {
+  return request({
+    url: '/textbook/review/' + textbookId,
+    method: 'get',
+  })
+}
 
 export function addTextbook(data) {
     return request({
